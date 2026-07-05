@@ -1,0 +1,17 @@
+opencv-python==4.11.0.86
+mediapipe
+streamlit
+streamlit-webrtc
+av
+numpy
+torch
+torchvision
+timm
+transformers
+huggingface_hub
+insightface
+onnxruntime
+librosa
+sounddevice
+pandas
+Pillow

@@ -1,0 +1,17 @@
+venv/
+__pycache__/
+*.pyc
+
+detections.db
+detections.csv
+
+screenshots/
+
+dataset/
+sample_videos/
+
+.vscode/
+.idea/
+
+*.log
+*.pth
