@@ -2,11 +2,14 @@ import numpy as np
 import tensorflow as tf
 import cv2
 
+from utils.detection_utils import classify_prediction
+
+
 class DeepfakeDetector:
 
     def __init__(self):
         self.model = tf.keras.models.load_model("models/deepfake_model.keras")
-        print("✅ Deepfake AI Model Loaded")
+        print(" Deepfake AI Model Loaded")
 
     def predict(self, face):
 
@@ -20,11 +23,6 @@ class DeepfakeDetector:
         prediction = self.model.predict(face, verbose=0)[0][0]
         print("Prediction:", prediction)
 
-        if prediction >= 0.5:
-            label = "REAL"
-            confidence = prediction * 100
-        else:
-            label = "FAKE"
-            confidence = (1 - prediction) * 100
+        label, confidence = classify_prediction(float(prediction))
 
         return label, confidence

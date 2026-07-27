@@ -1,5 +1,8 @@
-import streamlit as st
+import os
 import subprocess
+import sys
+
+import streamlit as st
 
 st.set_page_config(
     page_title="Deepfake Detection System",
@@ -63,7 +66,21 @@ elif page == "📷 Live Detection":
 
     if st.button("Start Detection"):
 
-        subprocess.Popen(["python", "app.py"])
+        app_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "app.py"))
+        launch_kwargs = {
+            "cwd": os.path.dirname(app_path),
+            "stdin": subprocess.DEVNULL,
+            "stdout": subprocess.DEVNULL,
+            "stderr": subprocess.DEVNULL,
+        }
+
+        if os.name == "nt":
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+            launch_kwargs["startupinfo"] = startupinfo
+
+        subprocess.Popen([sys.executable, app_path], **launch_kwargs)
 
         st.success("Webcam Started")
 

@@ -1,51 +1,151 @@
-import streamlit as st
 import cv2
-import numpy as np
+import csv
+import os
+from datetime import datetime
+from tkinter import Tk, filedialog, messagebox
 
 from face_detector import detect_faces
 from deepfake_detector import DeepfakeDetector
+from database import save_detection
+from report_generator import generate_report
 
-st.title("🖼️ Deepfake Detection from Image")
+# -----------------------------
+# Create folders/files
+# -----------------------------
 
-detector = DeepfakeDetector()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SCREENSHOTS_DIR = os.path.join(BASE_DIR, "screenshots")
+CSV_PATH = os.path.join(BASE_DIR, "detections.csv")
 
-uploaded_file = st.file_uploader(
-    "Upload an image",
-    type=["jpg", "jpeg", "png"]
+os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
+
+if not os.path.exists(CSV_PATH):
+    with open(CSV_PATH, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Date", "Time", "Prediction", "Confidence"])
+
+# -----------------------------
+# Load AI Model
+# -----------------------------
+
+model = DeepfakeDetector()
+
+# -----------------------------
+# Select Image
+# -----------------------------
+
+root = Tk()
+root.withdraw()
+
+image_path = filedialog.askopenfilename(
+    title="Select Image",
+    filetypes=[
+        ("Image Files", "*.jpg *.jpeg *.png *.bmp")
+    ]
 )
 
-if uploaded_file is not None:
+if image_path == "":
+    print("No image selected.")
+    exit()
 
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+frame = cv2.imread(image_path)
 
-    image = cv2.imdecode(file_bytes, 1)
+if frame is None:
+    print("Cannot open image.")
+    exit()
 
-    faces = detect_faces(image)
+faces = detect_faces(frame)
 
-    for (x, y, w, h) in faces:
+if len(faces) == 0:
+    messagebox.showinfo("Result", "No face detected.")
+    exit()
 
-        face = image[y:y+h, x:x+w]
+# -----------------------------
+# Detect Faces
+# -----------------------------
 
-        label, confidence = detector.predict(face)
+for (x, y, w, h) in faces:
 
-        color = (0,255,0)
+    face = frame[y:y+h, x:x+w]
 
-        if label == "FAKE":
-            color = (0,0,255)
+    if face.size == 0:
+        continue
 
-        cv2.rectangle(image,(x,y),(x+w,y+h),color,2)
+    label, confidence = model.predict(face)
 
-        cv2.putText(
-            image,
-            f"{label} {confidence:.1f}%",
-            (x,y-10),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.8,
-            color,
-            2
+    color = (0, 255, 0)
+
+    if label == "FAKE":
+        color = (0, 0, 255)
+
+    cv2.rectangle(
+        frame,
+        (x, y),
+        (x+w, y+h),
+        color,
+        2
+    )
+
+    cv2.putText(
+        frame,
+        f"{label} {confidence:.2f}%",
+        (x, y-10),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.8,
+        color,
+        2
+    )
+
+    now = datetime.now()
+
+    # Save CSV
+
+    with open(CSV_PATH, "a", newline="") as f:
+
+        writer = csv.writer(f)
+
+        writer.writerow([
+            now.strftime("%Y-%m-%d"),
+            now.strftime("%H:%M:%S"),
+            label,
+            f"{confidence:.2f}"
+        ])
+
+    # Save Database
+
+    save_detection(
+        now.strftime("%Y-%m-%d"),
+        now.strftime("%H:%M:%S"),
+        label,
+        float(confidence)
+    )
+
+    # Save Screenshot
+
+    if label == "FAKE":
+
+        filename = os.path.join(
+            SCREENSHOTS_DIR,
+            "IMG_" + now.strftime("%Y%m%d_%H%M%S") + ".jpg"
         )
 
-    st.image(
-        cv2.cvtColor(image, cv2.COLOR_BGR2RGB),
-        use_container_width=True
-    )
+        cv2.imwrite(filename, frame)
+        print("Screenshot Saved:", filename)
+        generate_report(label, confidence, image_path=filename)
+    else:
+        generate_report(label, confidence)
+
+# -----------------------------
+# Display Result
+# -----------------------------
+
+cv2.imshow("Image Deepfake Detection", frame)
+
+cv2.waitKey(0)
+
+cv2.destroyAllWindows()
+
+messagebox.showinfo(
+    "Detection Complete",
+    "Image analysis completed successfully."
+)

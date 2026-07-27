@@ -7,7 +7,7 @@ class Camera:
         self.cap = cv2.VideoCapture(0)
 
         if not self.cap.isOpened():
-            raise Exception("Cannot open webcam")
+            raise Exception("Cannot access the webcam. Please check that it is connected and not being used by another app.")
 
     def get_frame(self):
         success, frame = self.cap.read()

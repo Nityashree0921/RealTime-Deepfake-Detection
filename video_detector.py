@@ -1,84 +1,155 @@
-import streamlit as st
+
 import cv2
-import tempfile
+import csv
+import os
+from datetime import datetime
+from tkinter import Tk, filedialog, messagebox
 
 from face_detector import detect_faces
 from deepfake_detector import DeepfakeDetector
+from database import save_detection
+from report_generator import generate_report
 
+# -------------------------------------
+# Create folders/files
+# -------------------------------------
 
-st.title("🎥 Deepfake Detection from Video")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SCREENSHOTS_DIR = os.path.join(BASE_DIR, "screenshots")
+CSV_PATH = os.path.join(BASE_DIR, "detections.csv")
 
-detector = DeepfakeDetector()
+os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
 
-uploaded_video = st.file_uploader(
-    "Upload Video",
-    type=["mp4", "avi", "mov"]
+if not os.path.exists(CSV_PATH):
+    with open(CSV_PATH, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Date", "Time", "Prediction", "Confidence"])
+
+# -------------------------------------
+# Load Model
+# -------------------------------------
+
+model = DeepfakeDetector()
+
+# -------------------------------------
+# Select Video
+# -------------------------------------
+
+root = Tk()
+root.withdraw()
+
+video_path = filedialog.askopenfilename(
+    title="Select Video",
+    filetypes=[
+        ("Video Files", "*.mp4 *.avi *.mov *.mkv")
+    ]
 )
 
-if uploaded_video:
+if video_path == "":
+    print("No video selected.")
+    exit()
 
-    tfile = tempfile.NamedTemporaryFile(delete=False)
-    tfile.write(uploaded_video.read())
+cap = cv2.VideoCapture(video_path)
 
-    cap = cv2.VideoCapture(tfile.name)
+if not cap.isOpened():
+    print("Unable to open video.")
+    exit()
 
-    stframe = st.empty()
+frame_count = 0
+last_saved = ""
 
-    real = 0
-    fake = 0
+print("Processing video...")
 
-    while cap.isOpened():
+while True:
 
-        ret, frame = cap.read()
+    ret, frame = cap.read()
 
-        if not ret:
-            break
+    if not ret:
+        break
 
-        faces = detect_faces(frame)
+    frame_count += 1
 
-        for (x, y, w, h) in faces:
+    # Process every 5th frame
+    if frame_count % 5 != 0:
+        continue
 
-            face = frame[y:y+h, x:x+w]
+    faces = detect_faces(frame)
 
-            label, confidence = detector.predict(face)
+    for (x, y, w, h) in faces:
 
-            color = (0,255,0)
+        face = frame[y:y+h, x:x+w]
 
-            if label == "FAKE":
-                color = (0,0,255)
-                fake += 1
-            else:
-                real += 1
+        if face.size == 0:
+            continue
 
-            cv2.rectangle(frame,(x,y),(x+w,y+h),color,2)
+        label, confidence = model.predict(face)
 
-            cv2.putText(
-                frame,
-                f"{label} {confidence:.1f}%",
-                (x,y-10),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.8,
-                color,
-                2
-            )
+        color = (0,255,0)
 
-        stframe.image(
-            cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
-            channels="RGB",
-            use_container_width=True
+        if label == "FAKE":
+            color = (0,0,255)
+
+        cv2.rectangle(frame,(x,y),(x+w,y+h),color,2)
+
+        cv2.putText(
+            frame,
+            f"{label} {confidence:.2f}%",
+            (x,y-10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            color,
+            2
         )
 
-    cap.release()
+        now = datetime.now()
 
-    st.success("Video Analysis Completed")
+        current = now.strftime("%Y-%m-%d %H:%M:%S")
 
-    st.write("### Results")
+        if current != last_saved:
 
-    st.write(f"✅ REAL Frames : {real}")
+            last_saved = current
 
-    st.write(f"❌ FAKE Frames : {fake}")
+            with open(CSV_PATH, "a", newline="") as f:
 
-    if fake > real:
-        st.error("Overall Result : FAKE VIDEO")
-    else:
-        st.success("Overall Result : REAL VIDEO")
+                writer = csv.writer(f)
+
+                writer.writerow([
+                    now.strftime("%Y-%m-%d"),
+                    now.strftime("%H:%M:%S"),
+                    label,
+                    f"{confidence:.2f}"
+                ])
+
+            save_detection(
+                now.strftime("%Y-%m-%d"),
+                now.strftime("%H:%M:%S"),
+                label,
+                float(confidence)
+            )
+
+            if label == "FAKE":
+
+                filename = os.path.join(
+                    SCREENSHOTS_DIR,
+                    "VIDEO_" + now.strftime("%Y%m%d_%H%M%S") + ".jpg"
+                )
+
+                cv2.imwrite(filename, frame)
+                print("Screenshot Saved:", filename)
+                generate_report(label, confidence, image_path=filename)
+            else:
+                generate_report(label, confidence)
+
+    cv2.imshow("Video Deepfake Detection", frame)
+
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
+
+cap.release()
+
+cv2.destroyAllWindows()
+
+messagebox.showinfo(
+    "Completed",
+    "Video Detection Finished Successfully."
+)
