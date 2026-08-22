@@ -1,0 +1,51 @@
+================================================================================
+V7 UNSEEN TEST EVALUATION REPORT — REAL-TIME DEEPFAKE DETECTION
+================================================================================
+Model Path                : models/deepfake_face_model_v7.keras
+Test Directory            : face_dataset_v7/test
+Frozen Operating Threshold: 0.65 (Calibrated on validation split)
+Total Unseen Test Frames  : 76 (REAL=41, FAKE=35)
+
+OVERALL TEST METRICS:
+--------------------------------------------------------------------------------
+Accuracy                  : 30.26%
+ROC-AUC                   : 0.4397
+Sensitivity (Recall REAL) : 7.32%
+Specificity (Recall FAKE) : 57.14%
+False Positive Rate (FPR) : 42.86%
+False Negative Rate (FNR) : 92.68%
+Macro F1 Score            : 0.2659
+
+CLASS BREAKDOWN:
+--------------------------------------------------------------------------------
+REAL Faces (Class 1):
+  Precision               : 16.67%
+  Recall                  : 7.32%
+  F1 Score                : 0.1017
+  Correctly Classified    : 3 / 41 (7.32%)
+  Misclassified as FAKE   : 38 / 41 (92.68%)
+
+FAKE Faces (Class 0):
+  Precision               : 34.48%
+  Recall                  : 57.14%
+  F1 Score                : 0.4301
+  Correctly Classified    : 20 / 35 (57.14%)
+  Misclassified as REAL   : 15 / 35 (42.86%)
+
+CONFUSION MATRIX:
+--------------------------------------------------------------------------------
+                 PREDICTED
+                 FAKE    REAL
+ACTUAL FAKE        20      15
+ACTUAL REAL        38       3
+
+PROBABILITY DISTRIBUTIONS:
+--------------------------------------------------------------------------------
+REAL Images (P(REAL)):
+  Mean = 53.99% | Median = 55.27% | Std = 9.20%
+  Min = 30.70% | Max = 73.62%
+
+FAKE Images (P(REAL)):
+  Mean = 58.74% | Median = 53.26% | Std = 15.38%
+  Min = 34.24% | Max = 84.17%
+================================================================================

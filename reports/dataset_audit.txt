@@ -1,0 +1,98 @@
+===========================================================================
+REALTIME DEEPFAKE DETECTION — COMPREHENSIVE DATASET AUDIT REPORT
+===========================================================================
+
+1. DATASET TOTALS & INVENTORY:
+  Source Folders      : face_frames/real | face_frames/fake
+  REAL Total Frames   : 220 valid images (0 corrupt)
+  FAKE Total Frames   : 228 valid images (0 corrupt)
+  Total Dataset Frames: 448 face frames
+  Class Balance       : REAL = 49.11% | FAKE = 50.89%
+
+2. UNIQUE VIDEO ID ANALYSIS:
+  Unique REAL Video IDs (32): ['000', '003', '004', '009', '011', '014', '015', '016', '017', '018', '020', '022', '023', '024', '025', '026', '027', '028', '029', '030', '031', '032', '034', '035', '038', '040', '043', '044', '049', '050', '051', '052']
+  Unique FAKE Video IDs (34): ['000', '004', '008', '009', '011', '014', '015', '016', '017', '018', '020', '021', '022', '023', '024', '025', '027', '028', '029', '030', '031', '032', '034', '035', '039', '040', '041', '043', '044', '048', '049', '050', '051', '052']
+
+3. FRAMES-PER-VIDEO DISTRIBUTION:
+  REAL Frames/Video   : Min = 1, Max = 18, Avg = 6.88, Median = 6.0
+  FAKE Frames/Video   : Min = 1, Max = 18, Avg = 6.71, Median = 6.0
+
+4. IMAGE DIMENSIONS & CORRUPT CHECK:
+  REAL Dimensions Found: [(224, 224, 3)]
+  FAKE Dimensions Found: [(224, 224, 3)]
+  Corrupt/Unreadable   : 0 files found
+
+5. DUPLICATE ANALYSIS:
+  Duplicate Filenames  : REAL=0, FAKE=0
+  Perceptual Hash Exact Duplicates: REAL=13 clusters, FAKE=9 clusters
+
+6. PER-VIDEO DETAILED BREAKDOWN:
+  REAL VIDEOS:
+    Video ID '000': 9 frames (e.g. real_000_0000.jpg)
+    Video ID '003': 1 frames (e.g. real_003_0003.jpg)
+    Video ID '004': 8 frames (e.g. real_004_0000.jpg)
+    Video ID '009': 6 frames (e.g. real_009_0000.jpg)
+    Video ID '011': 9 frames (e.g. real_011_0000.jpg)
+    Video ID '014': 3 frames (e.g. real_014_0002.jpg)
+    Video ID '015': 4 frames (e.g. real_015_0001.jpg)
+    Video ID '016': 10 frames (e.g. real_016_0000.jpg)
+    Video ID '017': 11 frames (e.g. real_017_0000.jpg)
+    Video ID '018': 12 frames (e.g. real_018_0000.jpg)
+    Video ID '020': 9 frames (e.g. real_020_0000.jpg)
+    Video ID '022': 12 frames (e.g. real_022_0000.jpg)
+    Video ID '023': 2 frames (e.g. real_023_0000.jpg)
+    Video ID '024': 18 frames (e.g. real_024_0000.jpg)
+    Video ID '025': 11 frames (e.g. real_025_0001.jpg)
+    Video ID '026': 2 frames (e.g. real_026_0000.jpg)
+    Video ID '027': 3 frames (e.g. real_027_0000.jpg)
+    Video ID '028': 9 frames (e.g. real_028_0000.jpg)
+    Video ID '029': 5 frames (e.g. real_029_0004.jpg)
+    Video ID '030': 10 frames (e.g. real_030_0000.jpg)
+    Video ID '031': 15 frames (e.g. real_031_0000.jpg)
+    Video ID '032': 6 frames (e.g. real_032_0000.jpg)
+    Video ID '034': 3 frames (e.g. real_034_0007.jpg)
+    Video ID '035': 3 frames (e.g. real_035_0001.jpg)
+    Video ID '038': 2 frames (e.g. real_038_0006.jpg)
+    Video ID '040': 5 frames (e.g. real_040_0000.jpg)
+    Video ID '043': 5 frames (e.g. real_043_0000.jpg)
+    Video ID '044': 2 frames (e.g. real_044_0004.jpg)
+    Video ID '049': 7 frames (e.g. real_049_0000.jpg)
+    Video ID '050': 6 frames (e.g. real_050_0001.jpg)
+    Video ID '051': 6 frames (e.g. real_051_0001.jpg)
+    Video ID '052': 6 frames (e.g. real_052_0000.jpg)
+  FAKE VIDEOS:
+    Video ID '000': 5 frames (e.g. fake_000_0000.jpg)
+    Video ID '004': 4 frames (e.g. fake_004_0001.jpg)
+    Video ID '008': 1 frames (e.g. fake_008_0009.jpg)
+    Video ID '009': 6 frames (e.g. fake_009_0000.jpg)
+    Video ID '011': 8 frames (e.g. fake_011_0000.jpg)
+    Video ID '014': 9 frames (e.g. fake_014_0000.jpg)
+    Video ID '015': 9 frames (e.g. fake_015_0000.jpg)
+    Video ID '016': 10 frames (e.g. fake_016_0000.jpg)
+    Video ID '017': 11 frames (e.g. fake_017_0000.jpg)
+    Video ID '018': 12 frames (e.g. fake_018_0000.jpg)
+    Video ID '020': 9 frames (e.g. fake_020_0000.jpg)
+    Video ID '021': 11 frames (e.g. fake_021_0000.jpg)
+    Video ID '022': 12 frames (e.g. fake_022_0000.jpg)
+    Video ID '023': 3 frames (e.g. fake_023_0000.jpg)
+    Video ID '024': 18 frames (e.g. fake_024_0000.jpg)
+    Video ID '025': 12 frames (e.g. fake_025_0000.jpg)
+    Video ID '027': 5 frames (e.g. fake_027_0001.jpg)
+    Video ID '028': 5 frames (e.g. fake_028_0003.jpg)
+    Video ID '029': 2 frames (e.g. fake_029_0004.jpg)
+    Video ID '030': 10 frames (e.g. fake_030_0000.jpg)
+    Video ID '031': 15 frames (e.g. fake_031_0000.jpg)
+    Video ID '032': 9 frames (e.g. fake_032_0000.jpg)
+    Video ID '034': 2 frames (e.g. fake_034_0008.jpg)
+    Video ID '035': 3 frames (e.g. fake_035_0004.jpg)
+    Video ID '039': 3 frames (e.g. fake_039_0000.jpg)
+    Video ID '040': 2 frames (e.g. fake_040_0004.jpg)
+    Video ID '041': 1 frames (e.g. fake_041_0007.jpg)
+    Video ID '043': 8 frames (e.g. fake_043_0000.jpg)
+    Video ID '044': 4 frames (e.g. fake_044_0000.jpg)
+    Video ID '048': 1 frames (e.g. fake_048_0007.jpg)
+    Video ID '049': 6 frames (e.g. fake_049_0000.jpg)
+    Video ID '050': 8 frames (e.g. fake_050_0002.jpg)
+    Video ID '051': 2 frames (e.g. fake_051_0005.jpg)
+    Video ID '052': 2 frames (e.g. fake_052_0000.jpg)
+===========================================================================

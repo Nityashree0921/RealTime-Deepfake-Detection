@@ -1,59 +1,54 @@
-# =========================
 # Python
-# =========================
-venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# =========================
-# Large datasets
-# =========================
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Datasets
 face_frames/
 face_dataset_v5/
 face_dataset_v7/
-webcam_test/
 
-# =========================
-# Videos
-# =========================
+# Webcam/test images
+webcam_test/
+webcam_images/
+dataset_preview.jpg
+
+# Large media
 *.mp4
 *.avi
 *.mov
 *.mkv
 *.webm
 
-# =========================
-# Generated images/reports
-# =========================
-outputs/
-reports/
-*.png
-*.jpg
-*.jpeg
-
-# =========================
-# Temporary files
-# =========================
-*.tmp
+# Generated files
 *.log
+*.tmp
 
-# =========================
-# Environment/secrets
-# =========================
-.env
+# TensorFlow/Keras models
+models/*.keras
+models/*.h5
+models/*.hdf5
 
-# =========================
+# Checkpoints
+checkpoints/
+
+# Python cache
+.pytest_cache/
+
 # IDE
-# =========================
 .vscode/
 .idea/
 
-# =========================
-# Python cache
-# =========================
-.pytest_cache/
+# OS
+.DS_Store
+Thumbs.db
 
-# =========================
-# Backup
-# =========================
-*_BACKUP/
+# Secrets
+.env
+*.env
