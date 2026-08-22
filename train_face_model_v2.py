@@ -14,16 +14,16 @@ from sklearn.model_selection import train_test_split
 IMG_SIZE = 224
 BATCH_SIZE = 16
 
-INITIAL_EPOCHS = 8
-FINE_TUNE_EPOCHS = 7
+INITIAL_EPOCHS = 10
+FINE_TUNE_EPOCHS = 10
 
-REAL_DIR = "frames/real"
-FAKE_DIR = "frames/fake"
+REAL_DIR = "face_frames/real"
+FAKE_DIR = "face_frames/fake"
 
 MODEL_DIR = "models"
 MODEL_PATH = os.path.join(
     MODEL_DIR,
-    "deepfake_model.keras"
+    "deepfake_face_model_v2.keras"
 )
 
 os.makedirs(MODEL_DIR, exist_ok=True)
@@ -37,7 +37,7 @@ images = []
 labels = []
 
 print("=" * 60)
-print("LOADING VIDEO-DERIVED FRAMES")
+print("LOADING CROPPED FACE DATASET")
 print("=" * 60)
 
 
@@ -50,7 +50,7 @@ def load_images(folder, label):
         )
     ]
 
-    print(f"{folder}: {len(files)} frames")
+    print(f"{folder}: {len(files)} images")
 
     for i, filename in enumerate(files):
 
@@ -93,6 +93,7 @@ y = np.array(
     dtype="float32"
 )
 
+
 print("\nDataset shape:", X.shape)
 print("Labels shape:", y.shape)
 
@@ -123,15 +124,9 @@ X_train, X_val, y_train, y_val = train_test_split(
     stratify=y
 )
 
-print(
-    "\nTraining samples:",
-    len(X_train)
-)
 
-print(
-    "Validation samples:",
-    len(X_val)
-)
+print("\nTraining samples:", len(X_train))
+print("Validation samples:", len(X_val))
 
 
 # =========================================================
@@ -140,21 +135,19 @@ print(
 
 data_augmentation = tf.keras.Sequential([
 
-    layers.RandomFlip(
-        "horizontal"
+    layers.RandomFlip("horizontal"),
+
+    layers.RandomRotation(0.08),
+
+    layers.RandomZoom(0.15),
+
+    layers.RandomTranslation(
+        height_factor=0.05,
+        width_factor=0.05
     ),
 
-    layers.RandomRotation(
-        0.05
-    ),
+    layers.RandomContrast(0.15),
 
-    layers.RandomZoom(
-        0.10
-    ),
-
-    layers.RandomContrast(
-        0.10
-    )
 ])
 
 
@@ -182,7 +175,7 @@ base_model = MobileNetV2(
 )
 
 
-# Freeze base model initially
+# Freeze initially
 
 base_model.trainable = False
 
@@ -203,8 +196,6 @@ inputs = layers.Input(
 x = data_augmentation(inputs)
 
 
-# MobileNetV2 expects pixel values approximately [-1, 1]
-
 x = tf.keras.applications.mobilenet_v2.preprocess_input(
     x
 )
@@ -217,6 +208,8 @@ x = base_model(
 
 
 x = layers.GlobalAveragePooling2D()(x)
+
+x = layers.BatchNormalization()(x)
 
 x = layers.Dropout(0.4)(x)
 
@@ -240,7 +233,7 @@ model = models.Model(
 
 
 # =========================================================
-# COMPILE - STAGE 1
+# COMPILE STAGE 1
 # =========================================================
 
 model.compile(
@@ -252,7 +245,13 @@ model.compile(
     loss="binary_crossentropy",
 
     metrics=[
-        "accuracy"
+        "accuracy",
+        tf.keras.metrics.Precision(
+            name="precision"
+        ),
+        tf.keras.metrics.Recall(
+            name="recall"
+        )
     ]
 )
 
@@ -285,9 +284,22 @@ callbacks = [
 
         monitor="val_loss",
 
-        patience=3,
+        patience=4,
 
         restore_best_weights=True,
+
+        verbose=1
+    ),
+
+    tf.keras.callbacks.ReduceLROnPlateau(
+
+        monitor="val_loss",
+
+        factor=0.5,
+
+        patience=2,
+
+        min_lr=1e-7,
 
         verbose=1
     )
@@ -296,7 +308,6 @@ callbacks = [
 
 # =========================================================
 # STAGE 1
-# TRANSFER LEARNING
 # =========================================================
 
 print("\n")
@@ -308,6 +319,7 @@ print("=" * 60)
 history1 = model.fit(
 
     X_train,
+
     y_train,
 
     validation_data=(
@@ -332,19 +344,17 @@ history1 = model.fit(
 
 print("\n")
 print("=" * 60)
-print("STAGE 2: FINE-TUNING MOBILENETV2")
+print("STAGE 2: FINE-TUNING")
 print("=" * 60)
 
-
-# Unfreeze MobileNetV2
 
 base_model.trainable = True
 
 
-# Freeze the first layers
-# Train only the later layers
+# Keep first 100 layers frozen
 
 fine_tune_at = 100
+
 
 for layer in base_model.layers[
     :fine_tune_at
@@ -369,13 +379,19 @@ print(
 model.compile(
 
     optimizer=tf.keras.optimizers.Adam(
-        learning_rate=0.00001
+        learning_rate=1e-5
     ),
 
     loss="binary_crossentropy",
 
     metrics=[
-        "accuracy"
+        "accuracy",
+        tf.keras.metrics.Precision(
+            name="precision"
+        ),
+        tf.keras.metrics.Recall(
+            name="recall"
+        )
     ]
 )
 
@@ -415,7 +431,7 @@ print("FINAL MODEL EVALUATION")
 print("=" * 60)
 
 
-loss, accuracy = model.evaluate(
+results = model.evaluate(
 
     X_val,
 
@@ -425,15 +441,16 @@ loss, accuracy = model.evaluate(
 )
 
 
-print(
-    f"\nValidation Accuracy: "
-    f"{accuracy * 100:.2f}%"
-)
+print("\nValidation Results:")
 
-print(
-    f"Validation Loss: "
-    f"{loss:.4f}"
-)
+for name, value in zip(
+    model.metrics_names,
+    results
+):
+
+    print(
+        f"{name}: {value:.4f}"
+    )
 
 
 # =========================================================
@@ -447,7 +464,7 @@ model.save(
 
 print("\n")
 print("=" * 60)
-print("TRAINING COMPLETED")
+print("FACE MODEL TRAINING COMPLETED")
 print("=" * 60)
 
 print(

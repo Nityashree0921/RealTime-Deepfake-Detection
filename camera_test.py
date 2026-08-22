@@ -1,22 +1,37 @@
 import cv2
 
-cap = cv2.VideoCapture(0)
+print("Starting camera test...")
 
-if not cap.isOpened():
-    print("Cannot open camera")
+camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+if not camera.isOpened():
+    print("❌ Camera could not be opened.")
+    print("Trying another camera index...")
+
+    camera.release()
+    camera = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+
+if not camera.isOpened():
+    print("❌ No camera found.")
+    print("Check Windows camera permissions and whether another app is using the camera.")
     exit()
 
+print("✅ Camera opened successfully!")
+print("Press Q to quit.")
+
 while True:
-    ret, frame = cap.read()
+    ret, frame = camera.read()
 
     if not ret:
-        print("Failed to grab frame")
+        print("❌ Could not read frame from camera.")
         break
 
     cv2.imshow("Camera Test", frame)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    key = cv2.waitKey(1) & 0xFF
+
+    if key == ord("q"):
         break
 
-cap.release()
+camera.release()
 cv2.destroyAllWindows()

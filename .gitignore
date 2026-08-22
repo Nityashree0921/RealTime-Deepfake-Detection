@@ -1,17 +1,59 @@
+# =========================
+# Python
+# =========================
 venv/
 __pycache__/
 *.pyc
 
-detections.db
-detections.csv
+# =========================
+# Large datasets
+# =========================
+face_frames/
+face_dataset_v5/
+face_dataset_v7/
+webcam_test/
 
-screenshots/
+# =========================
+# Videos
+# =========================
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
 
-dataset/
-sample_videos/
+# =========================
+# Generated images/reports
+# =========================
+outputs/
+reports/
+*.png
+*.jpg
+*.jpeg
 
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.log
+
+# =========================
+# Environment/secrets
+# =========================
+.env
+
+# =========================
+# IDE
+# =========================
 .vscode/
 .idea/
 
-*.log
-*.pth
+# =========================
+# Python cache
+# =========================
+.pytest_cache/
+
+# =========================
+# Backup
+# =========================
+*_BACKUP/

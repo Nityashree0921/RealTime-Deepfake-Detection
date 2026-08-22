@@ -1,0 +1,85 @@
+================================================================================
+PROJECT AUDIT REPORT — REALTIME DEEPFAKE DETECTION (V6 AUDIT)
+================================================================================
+
+1. PROJECT OVERVIEW & SCOPE
+--------------------------------------------------------------------------------
+Project Name        : RealTime-Deepfake-Detection
+Workspace Root      : d:\Projects\RealTime-Deepfake-Detection
+Target Task         : Real-Time Face Deepfake Detection (Binary: REAL vs FAKE)
+Core Model Backbone : MobileNetV2 (Transfer Learning from ImageNet)
+Environment         : Windows, Python 3.10+, TensorFlow 2.21, OpenCV 4.11, Scikit-learn
+
+
+2. DATASET INVENTORY & AUDIT
+--------------------------------------------------------------------------------
+Source Video Directory (`dataset/`):
+- REAL Videos: 53 MP4 videos (`v1.mp4` to `v53.mp4`)
+- FAKE Videos: 53 MP4 videos (`vs1.mp4` to `vs53.mp4`)
+- Total Videos: 106 videos
+
+Face Frames Directory (`face_frames/`):
+- REAL Face Crops: 220 images across 32 unique video IDs
+  - Distinct REAL Video IDs: ['000', '003', '004', '009', '011', '014', '015', '016', '017', '018', '020', '022', '023', '024', '025', '026', '027', '028', '029', '030', '031', '032', '034', '035', '038', '040', '043', '044', '049', '050', '051', '052']
+  - Frames per Video: Min = 1, Max = 18, Mean = 6.9 frames/video
+- FAKE Face Crops: 228 images across 34 unique video IDs
+  - Distinct FAKE Video IDs: ['000', '004', '008', '009', '011', '014', '015', '016', '017', '018', '020', '021', '022', '023', '024', '025', '027', '028', '029', '030', '031', '032', '034', '035', '039', '040', '041', '043', '044', '048', '049', '050', '051', '052']
+  - Frames per Video: Min = 1, Max = 18, Mean = 6.7 frames/video
+- Total Frames in `face_frames`: 448 images
+- Class Balance: 220 REAL (49.1%) vs 228 FAKE (50.9%) -> Well-balanced
+- Resolution: 224 x 224 x 3 RGB images
+
+Webcam Real Face Test Set (`webcam_test/real/`):
+- Total Images: 200 real webcam crops (224 x 224 x 3)
+
+
+3. LABEL CONVENTION & MAPPING AUDIT
+--------------------------------------------------------------------------------
+Keras Directory Inferred Alphabetical Ordering:
+- Class 0: "fake"
+- Class 1: "real"
+Model Output: Sigmoid activation neuron in [0, 1]
+Mathematical Interpretation:
+  y_pred = P(REAL | x)
+  P(FAKE | x) = 1.0 - y_pred
+
+Audit of Past Bugs in V5 / Testing scripts:
+- In `test_webcam_real.py`: Images loaded with label 0=REAL, 1=FAKE, causing confusion between P(REAL) and P(FAKE).
+- In `deepfake_detector.py`: Normalized face by `/ 255.0` while model already contained internal `Rescaling(1/127.5, offset=-1)`, causing duplicate rescaling.
+- In `realtime_detector.py`: Treated `prediction >= threshold` as FAKE instead of REAL, inverting the model's confidence logic.
+
+
+4. MODEL ARCHITECTURE & PREPROCESSING AUDIT
+--------------------------------------------------------------------------------
+Model Backbone:
+- Input Shape: (224, 224, 3)
+- Built-in Data Augmentation: Horizontal Flip, Rotation, Zoom, Contrast
+- Built-in Preprocessing: `layers.Rescaling(1.0 / 127.5, offset=-1)` -> converts [0, 255] to [-1, 1]
+- Feature Extractor: `MobileNetV2(include_top=False, weights='imagenet')`
+- Pooling: `GlobalAveragePooling2D()`
+- Dense Head: Dropout(0.40) -> Dense(128, activation='relu') -> Dropout(0.30) -> Dense(1, activation='sigmoid')
+
+V5 Bottleneck Analysis:
+- V5 froze the entire MobileNetV2 base permanently without fine-tuning higher-level feature extractors.
+- On the small dataset of 448 frames, generic ImageNet features alone struggled to separate subtle deepfake warping artifacts without selective unfreezing.
+- Mean prediction of V5 on test set hovered at ~0.498 (FAKE) and ~0.470 (REAL), yielding near-chance ROC-AUC (~0.47-0.58).
+
+
+5. REAL-TIME INFERENCE PIPELINE AUDIT
+--------------------------------------------------------------------------------
+Detection Chain:
+Webcam Frame -> OpenCV SSD Caffe Face Detector (`face_detector.py`) -> Crop Largest Face -> BGR to RGB -> Resize to (224, 224) -> Float32 Array -> Model Internal Rescaling -> MobileNetV2 -> Dense Sigmoid -> Temporal Smoothing (Deque of 15 frames) -> Result & Probability Visualization.
+
+Bottlenecks Identified & Solutions:
+1. Realtime script (`realtime_detector.py`) previously pointed to `deepfake_face_model_v2.keras` and inverted the binary label meaning.
+2. We will update `realtime_detector.py` and `deepfake_detector.py` to point to `deepfake_face_model_v6.keras`, with correct probability handling ($P(\text{REAL}) = \text{output}$) and optimal validation-selected threshold.
+
+
+6. V6 ACTION PLAN SUMMARY
+--------------------------------------------------------------------------------
+- Phase 2: Audit dataset with `audit_dataset_v6.py`.
+- Phase 3: Video-level partitioned dataset in `face_dataset_v6/` using deterministic seed 42.
+- Phase 4: Two-stage training with feature extraction + top-layer fine-tuning in `train_face_model_v6.py`.
+- Phase 5: Threshold optimization on validation data, followed by un-tuned test evaluation and visualization curve generation.
+- Phase 6-10: Webcam test, sample visualization, realtime integration, and complete comparative reporting.
+================================================================================
