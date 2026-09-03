@@ -3,41 +3,41 @@ V7 UNSEEN TEST EVALUATION REPORT — REAL-TIME DEEPFAKE DETECTION
 ================================================================================
 Model Path                : models/deepfake_face_model_v7.keras
 Test Directory            : face_dataset_v7/test
-Frozen Operating Threshold: 0.65 (Calibrated on validation split)
+Frozen Operating Threshold: 0.35 (Calibrated on validation split)
 Total Unseen Test Frames  : 76 (REAL=41, FAKE=35)
 
 OVERALL TEST METRICS:
 --------------------------------------------------------------------------------
-Accuracy                  : 30.26%
+Accuracy                  : 52.63%
 ROC-AUC                   : 0.4397
-Sensitivity (Recall REAL) : 7.32%
-Specificity (Recall FAKE) : 57.14%
-False Positive Rate (FPR) : 42.86%
-False Negative Rate (FNR) : 92.68%
-Macro F1 Score            : 0.2659
+Sensitivity (Recall REAL) : 92.68%
+Specificity (Recall FAKE) : 5.71%
+False Positive Rate (FPR) : 94.29%
+False Negative Rate (FNR) : 7.32%
+Macro F1 Score            : 0.3893
 
 CLASS BREAKDOWN:
 --------------------------------------------------------------------------------
 REAL Faces (Class 1):
-  Precision               : 16.67%
-  Recall                  : 7.32%
-  F1 Score                : 0.1017
-  Correctly Classified    : 3 / 41 (7.32%)
-  Misclassified as FAKE   : 38 / 41 (92.68%)
+  Precision               : 53.52%
+  Recall                  : 92.68%
+  F1 Score                : 0.6786
+  Correctly Classified    : 38 / 41 (92.68%)
+  Misclassified as FAKE   : 3 / 41 (7.32%)
 
 FAKE Faces (Class 0):
-  Precision               : 34.48%
-  Recall                  : 57.14%
-  F1 Score                : 0.4301
-  Correctly Classified    : 20 / 35 (57.14%)
-  Misclassified as REAL   : 15 / 35 (42.86%)
+  Precision               : 40.00%
+  Recall                  : 5.71%
+  F1 Score                : 0.1000
+  Correctly Classified    : 2 / 35 (5.71%)
+  Misclassified as REAL   : 33 / 35 (94.29%)
 
 CONFUSION MATRIX:
 --------------------------------------------------------------------------------
                  PREDICTED
                  FAKE    REAL
-ACTUAL FAKE        20      15
-ACTUAL REAL        38       3
+ACTUAL FAKE         2      33
+ACTUAL REAL         3      38
 
 PROBABILITY DISTRIBUTIONS:
 --------------------------------------------------------------------------------

@@ -10,7 +10,7 @@ os.makedirs(REPORTS_DIR, exist_ok=True)
 styles = getSampleStyleSheet()
 
 
-def generate_report(prediction, confidence, image_path=None):
+def generate_report(prediction, confidence, image_path=None, file_path=None, modality=None, duration=None):
     os.makedirs(REPORTS_DIR, exist_ok=True)
 
     filename = os.path.join(
@@ -21,12 +21,28 @@ def generate_report(prediction, confidence, image_path=None):
     doc = SimpleDocTemplate(filename)
     story = []
 
+    # Infer modality if not provided
+    if not modality:
+        if str(prediction).startswith("AUDIO-"):
+            modality = "AUDIO"
+        elif str(prediction).startswith("VIDEO-"):
+            modality = "VIDEO"
+        elif str(prediction).startswith("IMAGE-"):
+            modality = "IMAGE"
+        else:
+            modality = "MULTIMODAL / WEBCAM"
+
     story.append(Paragraph("<b>AI Deepfake Detection Report</b>", styles["Title"]))
+    story.append(Paragraph(f"<b>Modality</b> : {modality}", styles["Normal"]))
     story.append(Paragraph(f"Date : {datetime.now().strftime('%d-%m-%Y')}", styles["Normal"]))
     story.append(Paragraph(f"Time : {datetime.now().strftime('%H:%M:%S')}", styles["Normal"]))
     story.append(Paragraph(f"Prediction : <b>{prediction}</b>", styles["Normal"]))
     story.append(Paragraph(f"Confidence : {confidence:.2f}%", styles["Normal"]))
 
+    if file_path:
+        story.append(Paragraph(f"Analyzed File : {file_path}", styles["Normal"]))
+    if duration:
+        story.append(Paragraph(f"Audio Duration : {duration:.2f} seconds", styles["Normal"]))
     if image_path:
         story.append(Paragraph(f"Screenshot : {image_path}", styles["Normal"]))
 

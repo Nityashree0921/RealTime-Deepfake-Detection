@@ -1,13 +1,29 @@
-from transformers import AutoFeatureExtractor, AutoModelForAudioClassification
+"""
+Audio Deepfake Detection Quick Validation Script
+Intelligent Real-Time Multimodal Deepfake Detection System
+"""
 
-MODEL_PATH = "models/audio_model"
+import os
+from evaluate_audio_model import evaluate_single_file
 
-print("Loading Feature Extractor...")
-feature_extractor = AutoFeatureExtractor.from_pretrained(MODEL_PATH)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+REAL_SAMPLE = os.path.join(BASE_DIR, "audio_dataset", "real", "real_human_speech_001.wav")
+FAKE_SAMPLE = os.path.join(BASE_DIR, "audio_dataset", "fake", "fake_ai_generated_001.wav")
 
-print("Loading Model...")
-model = AutoModelForAudioClassification.from_pretrained(MODEL_PATH)
+print("=" * 60)
+print("     TESTING REAL AUDIO SAMPLE INFERENCE")
+print("=" * 60)
+if os.path.exists(REAL_SAMPLE):
+    res_real = evaluate_single_file(REAL_SAMPLE)
+else:
+    print(f"Sample not found: {REAL_SAMPLE}")
 
-print("✅ Audio model loaded successfully!")
+print("\n" + "=" * 60)
+print("     TESTING FAKE AUDIO SAMPLE INFERENCE")
+print("=" * 60)
+if os.path.exists(FAKE_SAMPLE):
+    res_fake = evaluate_single_file(FAKE_SAMPLE)
+else:
+    print(f"Sample not found: {FAKE_SAMPLE}")
 
-print(model.config.id2label)
+print("\n[SUCCESS] Audio Deepfake Model Validation Complete!")

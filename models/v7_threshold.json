@@ -1,20 +1,21 @@
 {
     "model_path": "models/deepfake_face_model_v7.keras",
     "validation_directory": "face_dataset_v7/val",
-    "optimal_threshold": 0.65,
-    "selection_criterion": "highest_balanced_accuracy_on_validation",
+    "optimal_threshold": 0.35,
+    "selection_criterion": "highest_specificity_with_real_recall_at_least_0.90",
+    "target_real_recall": 0.9,
     "validation_metrics": {
-        "threshold": 0.65,
-        "accuracy": 0.6557,
-        "precision": 0.6071,
-        "recall": 0.6296,
-        "specificity": 0.6765,
-        "balanced_accuracy": 0.6531,
-        "f1": 0.6182,
-        "tp": 17,
-        "fp": 11,
-        "tn": 23,
-        "fn": 10
+        "threshold": 0.35,
+        "accuracy": 0.5246,
+        "precision": 0.4821,
+        "recall": 1.0,
+        "specificity": 0.1471,
+        "balanced_accuracy": 0.5735,
+        "f1": 0.6506,
+        "tp": 27,
+        "fp": 29,
+        "tn": 5,
+        "fn": 0
     },
     "full_sweep_table": [
         {

@@ -1,37 +1,58 @@
 import cv2
+import time
+from camera import Camera
 
-print("Starting camera test...")
+print("=" * 50)
+print("DEEPGUARD WEBCAM DIAGNOSTIC & TEST")
+print("=" * 50)
 
-camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+try:
+    cam = Camera()
+    print(f"✅ Camera successfully initialized on device index {cam.index} ({cam.backend})!")
+    print("Opening live preview window... Press 'Q' or close window to exit.")
 
-if not camera.isOpened():
-    print("❌ Camera could not be opened.")
-    print("Trying another camera index...")
+    WINDOW_NAME = "DeepGuard - Camera Diagnostic Test"
+    cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(WINDOW_NAME, 640, 480)
 
-    camera.release()
-    camera = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+    frame_count = 0
+    start_time = time.time()
 
-if not camera.isOpened():
-    print("❌ No camera found.")
-    print("Check Windows camera permissions and whether another app is using the camera.")
-    exit()
+    while True:
+        frame = cam.get_frame()
 
-print("✅ Camera opened successfully!")
-print("Press Q to quit.")
+        if frame is None:
+            print("⚠️ Warning: Empty frame received, retrying...")
+            time.sleep(0.03)
+            continue
 
-while True:
-    ret, frame = camera.read()
+        frame_count += 1
+        fps = frame_count / max(0.001, time.time() - start_time)
 
-    if not ret:
-        print("❌ Could not read frame from camera.")
-        break
+        # Draw overlay info
+        cv2.putText(frame, f"Device: Index {cam.index} ({cam.backend})", (15, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        cv2.putText(frame, f"FPS: {fps:.1f} | Res: {frame.shape[1]}x{frame.shape[0]}", (15, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+        cv2.putText(frame, "Press 'Q' to Exit", (15, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 200, 255), 1)
 
-    cv2.imshow("Camera Test", frame)
+        cv2.imshow(WINDOW_NAME, frame)
 
-    key = cv2.waitKey(1) & 0xFF
+        try:
+            if cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
+                break
+        except Exception:
+            pass
 
-    if key == ord("q"):
-        break
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("q") or key == 27:
+            break
 
-camera.release()
-cv2.destroyAllWindows()
+    cam.release()
+    cv2.destroyAllWindows()
+    print("✅ Camera test completed successfully.")
+
+except Exception as e:
+    print(f"❌ Camera Error: {e}")
+    print("\nTroubleshooting steps:")
+    print("1. Open Windows Settings -> Privacy & security -> Camera.")
+    print("2. Ensure 'Camera access' and 'Let desktop apps access your camera' are turned ON.")
+    print("3. Check if another app (Teams, Zoom, Google Meet, Chrome, OBS) is currently using your webcam.")

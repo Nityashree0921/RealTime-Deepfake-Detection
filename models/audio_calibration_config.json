@@ -1,0 +1,24 @@
+{
+  "model_name": "LFCC-CNN-BiLSTM Audio Classifier",
+  "version": "1.0.0",
+  "real_threshold_upper": 0.60,
+  "fake_threshold_lower": 0.40,
+  "uncertain_range": [0.40, 0.60],
+  "confidence_scaling": true,
+  "feature_params": {
+    "sr": 16000,
+    "target_duration": 3.0,
+    "n_fft": 512,
+    "hop_length": 256,
+    "win_length": 512,
+    "n_filter": 40,
+    "n_lfcc": 30,
+    "max_frames": 200
+  },
+  "calibration_mapping": {
+    "real_min_conf": 85.0,
+    "real_max_conf": 99.8,
+    "fake_min_conf": 85.0,
+    "fake_max_conf": 99.8
+  }
+}

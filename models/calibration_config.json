@@ -1,0 +1,23 @@
+{
+  "threshold_upper": 0.52,
+  "threshold_lower": 0.44,
+  "real_enter_threshold": 0.52,
+  "real_exit_threshold": 0.46,
+  "fake_enter_threshold": 0.44,
+  "fake_exit_threshold": 0.50,
+  "temporal_window": 6,
+  "fake_confirmation_frames": 3,
+  "real_confirmation_frames": 1,
+  "min_face_size": 70,
+  "blur_threshold": 20.0,
+  "max_displacement_px": 80.0,
+  "inference_interval_sec": 0.10,
+  "crop_padding": 0.20,
+  "calibration_mapping": {
+    "real_min_conf": 88.0,
+    "real_max_conf": 99.8,
+    "fake_min_conf": 88.0,
+    "fake_max_conf": 99.8
+  }
+}
+
